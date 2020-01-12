@@ -10,7 +10,7 @@ dependencies = [
 
 [[package]]
 name = "cargo-fixeq"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "proc-macro2 1.0.7 (registry+https://github.com/rust-lang/crates.io-index)",
