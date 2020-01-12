@@ -1,0 +1,13 @@
+[package]
+name = "cargo-fixeq"
+version = "0.1.0"
+edition = "2018"
+authors = ["Jun Wu <quark@lihdd.net>"]
+license = "MIT"
+description = "Fix `assert_eq!` test errors automatically."
+
+[dependencies]
+lazy_static = "1.0"
+proc-macro2 = { version = "1.0", features = ["span-locations"] }
+regex = "1.0"
+syn = { version = "1.0", features = ["parsing", "printing", "full", "visit"], default-features = false }
