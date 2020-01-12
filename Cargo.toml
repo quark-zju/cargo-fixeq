@@ -5,6 +5,10 @@ edition = "2018"
 authors = ["Jun Wu <quark@lihdd.net>"]
 license = "MIT"
 description = "Fix `assert_eq!` test errors automatically."
+categories = ["development-tools::cargo-plugins", "development-tools::testing"]
+keywords = ["cargo", "subcommand", "tests"]
+readme = "README.md"
+repository = "https://github.com/quark-zju/cargo-fixeq"
 
 [dependencies]
 lazy_static = "1.0"
