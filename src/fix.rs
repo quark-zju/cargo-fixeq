@@ -53,7 +53,7 @@ pub(crate) fn fix(failures: Vec<AssertEqFailure>) -> io::Result<usize> {
 
 /// Apply fixes to code.
 pub(crate) fn apply_fixes(code: &str, mut fixes: Vec<Fix>) -> String {
-    let mut lines = code.lines().map(|s| s.to_string()).collect::<Vec<_>>();
+    let mut lines = code.lines().map(|s| format!("{}\n", s)).collect::<Vec<_>>();
     fixes.sort_unstable_by(|lhs, rhs| rhs.location.start.line.cmp(&lhs.location.start.line));
     for fix in fixes {
         let loc = fix.location;
@@ -72,12 +72,7 @@ pub(crate) fn apply_fixes(code: &str, mut fixes: Vec<Fix>) -> String {
             }
         }
     }
-    let mut result = lines.join("\n");
-    // Preserve "\n" at EOF.
-    if code.ends_with('\n') {
-        result += "\n";
-    }
-    result
+    lines.concat()
 }
 
 /// Replace code at `location` with `content`.
