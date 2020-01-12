@@ -83,10 +83,47 @@ pub(crate) struct Fix {
 
 fn normalize_multi_line(s: &str) -> Cow<str> {
     if s.ends_with('\"') && s.contains(r"\n") && s.len() > 80 {
-        // Rewrite "a\nb" to
-        // r#"a
-        // b"#
-        return Cow::Owned(format!("r#{}#", s.replace(r"\n", "\n")));
+        let mut unescaped = String::with_capacity(s.len());
+        let mut escaped = false;
+        let mut giveup = false;
+        for ch in s.chars() {
+            match (ch, escaped) {
+                ('\\', false) => {
+                    escaped = true;
+                }
+                ('n', true) => {
+                    unescaped.push('\n');
+                    escaped = false;
+                }
+                ('r', true) => {
+                    unescaped.push('\r');
+                    escaped = false;
+                }
+                ('t', true) => {
+                    unescaped.push('\t');
+                    escaped = false;
+                }
+                ('\'', true) | ('\"', true) | ('\\', true) => {
+                    unescaped.push(ch);
+                    escaped = false;
+                }
+                (ch, false) => {
+                    unescaped.push(ch);
+                    escaped = false;
+                }
+                (_, true) => {
+                    // Unsupported escape sequences, like \x, \u, \0.
+                    giveup = true;
+                    break;
+                }
+            }
+        }
+        if !giveup {
+            // Rewrite "a\nb" to
+            // r#"a
+            // b"#
+            return Cow::Owned(format!("r#{}#", unescaped));
+        }
     }
     Cow::Borrowed(s)
 }
