@@ -5,12 +5,13 @@ use crate::parse_out::AssertEqFailure;
 use std::{
     borrow::Cow,
     collections::HashMap,
-    env, fs, io,
+    env, fs,
     path::{Path, PathBuf},
 };
+use anyhow::{Context};
 
 /// Attempt to fix failures. Return count of fixes applied.
-pub(crate) fn fix(failures: Vec<AssertEqFailure>) -> io::Result<usize> {
+pub(crate) fn fix(failures: Vec<AssertEqFailure>) -> anyhow::Result<usize> {
     let mut assert_eqs_by_path = HashMap::<PathBuf, Vec<AssertEqLocation>>::new();
     let mut content_by_path = HashMap::<PathBuf, String>::new();
     let mut fixes_by_path = HashMap::<PathBuf, Vec<Fix>>::new();
@@ -21,7 +22,7 @@ pub(crate) fn fix(failures: Vec<AssertEqFailure>) -> io::Result<usize> {
     for failure in failures {
         let path = crate_root.join(&failure.path);
         if !content_by_path.contains_key(&path) {
-            let content = fs::read_to_string(&path)?;
+            let content = fs::read_to_string(&path).context(format!("reading {:?}", path))?;
             content_by_path.insert(path.clone(), content);
         }
         let assert_eqs = assert_eqs_by_path.entry(path.clone()).or_insert_with(|| {
@@ -45,7 +46,7 @@ pub(crate) fn fix(failures: Vec<AssertEqFailure>) -> io::Result<usize> {
         count += fixes.len();
         let content = &content_by_path[&path];
         let new_content = apply_fixes(content, fixes);
-        fs::write(path, new_content)?;
+        fs::write(&path, new_content).context(format!("reading {:?}", path))?;
     }
 
     Ok(count)
