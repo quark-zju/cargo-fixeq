@@ -4,6 +4,9 @@ mod fix;
 mod parse_code;
 mod parse_out;
 
+#[cfg(test)]
+mod tests;
+
 use anyhow::Context;
 use std::{
     env,
