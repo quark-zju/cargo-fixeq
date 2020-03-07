@@ -1,5 +1,7 @@
 # `cargo-fixeq`
 
+![build](https://github.com/quark-zju/cargo-fixeq/workflows/build/badge.svg)
+
 Fix `assert_eq!` test errors by editing the source code to match the test output.
 
 Inspired by [Mercurial's `run-tests.py -i`](https://www.mercurial-scm.org/repo/hg/rev/02e9355c3420).
