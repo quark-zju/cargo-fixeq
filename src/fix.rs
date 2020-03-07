@@ -121,10 +121,14 @@ fn normalize_multi_line(s: &str) -> Cow<str> {
             }
         }
         if !giveup {
+            let mut pound = "#".to_string();
+            while unescaped.contains(&format!("{}\"", &pound)) {
+                pound.push('#')
+            }
             // Rewrite "a\nb" to
             // r#"a
             // b"#
-            return Cow::Owned(format!("r#{}#", unescaped));
+            return Cow::Owned(format!("r{}{}{}", &pound, unescaped, &pound));
         }
     }
     Cow::Borrowed(s)
