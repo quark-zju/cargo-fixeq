@@ -35,19 +35,25 @@ impl<'ast> Visit<'ast> for AssertEqVisitor {
         if path.is_ident(&Ident::new("assert_eq", path.span())) {
             let mut start = None;
             let mut end = None;
-            let mut seen_comma = false;
+            let mut seen_comma = 0;
             for token in i.mac.tokens.clone() {
-                if !seen_comma {
-                    if let TokenTree::Punct(ref p) = token {
-                        if p.as_char() == ',' {
-                            seen_comma = true;
-                        }
+                if let TokenTree::Punct(ref p) = token {
+                    if p.as_char() == ',' {
+                        seen_comma += 1;
+                        continue;
                     }
-                } else {
-                    if start.is_none() {
+                }
+                // assert_eq!(actual , expected , message, ...)
+                //                   ^ ^      ^ ^
+                //                   | start  | seen_comma=2
+                //        seen_comma=1        end
+                if seen_comma == 1 {
+                    if start.is_none() && seen_comma == 1 {
                         start = Some(token.span().start());
                     }
-                    end = Some(token.span().end());
+                    if end.is_none() {
+                        end = Some(token.span().end());
+                    }
                 }
             }
             if let (Some(start), Some(end)) = (start, end) {
@@ -116,7 +122,7 @@ fn main() {
     },
     AssertEqLocation {
         assert: 11,4-17,5,
-        rhs: 13,8-16,10,
+        rhs: 13,8-13,10,
     },
 ]"#
         );

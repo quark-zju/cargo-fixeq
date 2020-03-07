@@ -96,7 +96,6 @@ fn test_fixeq() {
 "##
     );
 
-    // FIXME: assert_eq! message is dropped
     assert_eq!(
         fix_code(
             r#"
@@ -107,7 +106,7 @@ fn test_fixeq() {
         .unwrap(),
         r#"
     #[test]
-    fn assert_with_msg() { assert_eq!(format!("foo {}", 1), "foo 1"); }
+    fn assert_with_msg() { assert_eq!(format!("foo {}", 1), "foo 1", "fmt {}", 2); }
 "#
     );
 }
