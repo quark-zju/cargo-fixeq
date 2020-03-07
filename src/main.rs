@@ -7,18 +7,31 @@ mod parse_out;
 use anyhow::Context;
 use std::{
     env,
+    ffi::OsStr,
     io::{self, Write},
     process::{self, Command},
     str,
 };
 
 fn main() -> anyhow::Result<()> {
+    let args: Vec<_> = env::args_os()
+        .skip(1)
+        .skip_while(|s| s == "fixeq")
+        .collect();
+    let exitcode = main_with_args(args)?;
+    process::exit(exitcode);
+}
+
+pub(crate) fn main_with_args<S: AsRef<OsStr>>(
+    args: impl IntoIterator<Item = S>,
+) -> anyhow::Result<i32> {
+    let args: Vec<_> = args.into_iter().collect();
     let cargo = env::var("CARGO").unwrap_or_else(|_| "cargo".to_string());
     let exitcode = loop {
         eprint!("Running tests...");
         let output = Command::new(&cargo)
             .arg("test")
-            .args(env::args_os().skip(1).skip_while(|s| s == "fixeq"))
+            .args(&args)
             .output()
             .context("running tests")?;
 
@@ -52,5 +65,5 @@ fn main() -> anyhow::Result<()> {
             eprintln!(" fixed {} assert_eq!s.", count);
         }
     };
-    process::exit(exitcode);
+    Ok(exitcode)
 }
