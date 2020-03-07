@@ -2,13 +2,13 @@
 
 use crate::parse_code::{self, AssertEqLocation, Location};
 use crate::parse_out::AssertEqFailure;
+use anyhow::Context;
 use std::{
     borrow::Cow,
     collections::HashMap,
     env, fs,
     path::{Path, PathBuf},
 };
-use anyhow::{Context};
 
 /// Attempt to fix failures. Return count of fixes applied.
 pub(crate) fn fix(failures: Vec<AssertEqFailure>) -> anyhow::Result<usize> {

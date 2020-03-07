@@ -4,13 +4,13 @@ mod fix;
 mod parse_code;
 mod parse_out;
 
+use anyhow::Context;
 use std::{
     env,
     io::{self, Write},
     process::{self, Command},
     str,
 };
-use anyhow::{Context};
 
 fn main() -> anyhow::Result<()> {
     let cargo = env::var("CARGO").unwrap_or_else(|_| "cargo".to_string());
@@ -19,13 +19,18 @@ fn main() -> anyhow::Result<()> {
         let output = Command::new(&cargo)
             .arg("test")
             .args(env::args_os().skip(1).skip_while(|s| s == "fixeq"))
-            .output().context("running tests")?;
+            .output()
+            .context("running tests")?;
 
         let forward_output = || -> anyhow::Result<()> {
             eprintln!("Last 'cargo test' output:");
             io::stderr().flush().context("flushing stderr")?;
-            io::stdout().write_all(&output.stdout).context("forwarding test stdout")?;
-            io::stderr().write_all(&output.stderr).context("forwarding test stderr")?;
+            io::stdout()
+                .write_all(&output.stdout)
+                .context("forwarding test stdout")?;
+            io::stderr()
+                .write_all(&output.stderr)
+                .context("forwarding test stderr")?;
             Ok(())
         };
 
