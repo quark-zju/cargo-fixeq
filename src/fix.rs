@@ -22,7 +22,8 @@ pub(crate) fn fix(failures: Vec<AssertEqFailure>) -> anyhow::Result<usize> {
     for failure in failures {
         let path = crate_root.join(&failure.path);
         if !content_by_path.contains_key(&path) {
-            let content = fs::read_to_string(&path).context(format!("reading {:?}", path))?;
+            let content =
+                fs::read_to_string(&path).with_context(|| format!("reading {:?}", path))?;
             content_by_path.insert(path.clone(), content);
         }
         let assert_eqs = assert_eqs_by_path.entry(path.clone()).or_insert_with(|| {
@@ -46,7 +47,7 @@ pub(crate) fn fix(failures: Vec<AssertEqFailure>) -> anyhow::Result<usize> {
         count += fixes.len();
         let content = &content_by_path[&path];
         let new_content = apply_fixes(content, fixes);
-        fs::write(&path, new_content).context(format!("reading {:?}", path))?;
+        fs::write(&path, new_content).with_context(|| format!("writing {:?}", path))?;
     }
 
     Ok(count)
