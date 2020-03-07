@@ -1,4 +1,4 @@
-//! Parsing `cargo test` output.
+//! Parse `cargo test` output.
 
 use lazy_static::lazy_static;
 use regex::Regex;

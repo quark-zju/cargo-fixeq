@@ -1,4 +1,4 @@
-//! Parsing Rust source code.
+//! Parse Rust source code.
 
 use proc_macro2::{LineColumn, TokenTree};
 use syn::{spanned::Spanned, visit::Visit, ExprMacro, Ident};

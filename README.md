@@ -26,7 +26,7 @@ fn test_f() {
 }
 ```
 
-Run `cargo fixeq`:
+Run `cargo fixeq` from the project root:
 
 ```bash
 cargo fixeq
@@ -43,7 +43,7 @@ The dummy values are fixed automatically:
  }
 ```
 
-In general, `cargo-fixeq` can be helpful for writing initial tests and update tests. See [here](https://github.com/facebookexperimental/eden/blob/213b3f086c349e84871add20ac8b5641397c62bf/eden/scm/lib/renderdag/src/box_drawing.rs#L321-L340) for a more complicated real world example.
+In general, `cargo-fixeq` can be helpful for writing initial tests and updating tests. See [here](https://github.com/facebookexperimental/eden/blob/213b3f086c349e84871add20ac8b5641397c62bf/eden/scm/lib/renderdag/src/box_drawing.rs#L321-L340) for a more complicated real world example.
 
 ## Command-line Parameters
 
