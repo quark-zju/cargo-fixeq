@@ -50,3 +50,6 @@ In general, `cargo-fixeq` can be helpful for writing initial tests and updating 
 ## Command-line Parameters
 
 All parameters are passed to `cargo test`. `cargo-fixeq` does not define its own parameters.
+
+## Similar Projects
+- [expect-test](https://github.com/rust-analyzer/expect-test): Lightweight snapshot testing.
