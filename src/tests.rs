@@ -108,5 +108,30 @@ fn test_fixeq() {
     #[test]
     fn assert_with_msg() { assert_eq!(format!("foo {}", 1), "foo 1", "fmt {}", 2); }
 "#
+
+    );
+
+    assert_eq!(
+        fix_code(
+            r#"
+    #[test]
+    fn test_vec() {
+        assert_eq!(
+            (1..3).collect::<Vec<u32>>(),
+            vec![0], "error message"
+        );
+    }
+"#
+        )
+        .unwrap(),
+        r#"
+    #[test]
+    fn test_vec() {
+        assert_eq!(
+            (1..3).collect::<Vec<u32>>(),
+            [1, 2], "error message"
+        );
+    }
+"#
     );
 }

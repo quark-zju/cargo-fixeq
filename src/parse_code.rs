@@ -35,23 +35,31 @@ impl<'ast> Visit<'ast> for AssertEqVisitor {
         if path.is_ident(&Ident::new("assert_eq", path.span())) {
             let mut start = None;
             let mut end = None;
-            let mut seen_comma = 0;
+            let mut seen_comma = false;
+            // assert_eq!(actual , expected , message, ...)
+            //                   ^ ^      ^ ^
+            //                   | start  | second_comma
+            //        seen_comma=true    end
             for token in i.mac.tokens.clone() {
-                if let TokenTree::Punct(ref p) = token {
-                    if p.as_char() == ',' {
-                        seen_comma += 1;
-                        continue;
+                match seen_comma {
+                    false => {
+                        if let TokenTree::Punct(ref p) = token {
+                            if p.as_char() == ',' {
+                                seen_comma = true;
+                            }
+                        }
                     }
-                }
-                // assert_eq!(actual , expected , message, ...)
-                //                   ^ ^      ^ ^
-                //                   | start  | seen_comma=2
-                //        seen_comma=1        end
-                if seen_comma == 1 {
-                    if start.is_none() && seen_comma == 1 {
-                        start = Some(token.span().start());
-                    }
-                    if end.is_none() {
+                    true => {
+                        if start.is_none() {
+                            start = Some(token.span().start());
+                        }
+
+                        if let TokenTree::Punct(ref p) = token {
+                            if p.as_char() == ',' {
+                                // seen second comma
+                                break;
+                            }
+                        }
                         end = Some(token.span().end());
                     }
                 }
@@ -122,7 +130,7 @@ fn main() {
     },
     AssertEqLocation {
         assert: 11,4-17,5,
-        rhs: 13,8-13,10,
+        rhs: 13,8-16,9,
     },
 ]"#
         );
