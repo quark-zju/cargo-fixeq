@@ -26,7 +26,7 @@ path = "example.rs""#,
 }
 
 #[test]
-fn test_fixeq() {
+fn test_fixeq_multi_tests() {
     assert_eq!(
         fix_code(
             r#"
@@ -50,7 +50,10 @@ fn test_fixeq() {
     }
 "#
     );
+}
 
+#[test]
+fn test_fixeq_long_message() {
     assert_eq!(
         fix_code(
             r#"
@@ -86,7 +89,10 @@ fn test_fixeq() {
     }
 "##
     );
+}
 
+#[test]
+fn test_fixeq_with_message() {
     assert_eq!(
         fix_code(
             r#"
