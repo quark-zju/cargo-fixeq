@@ -5,7 +5,6 @@ use std::fs;
 /// For testing purpose only.
 fn fix_code(code: &str) -> Result<String> {
     let orig_cwd = std::env::current_dir()?;
-    let orig_manifest_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_default();
 
     let dir = tempfile::tempdir()?;
     fs::write(
@@ -22,13 +21,11 @@ path = "example.rs""#,
     fs::write(&lib_path, code)?;
 
     std::env::set_current_dir(dir.path())?;
-    std::env::set_var("CARGO_MANIFEST_DIR", dir.path());
 
     crate::main_with_args(vec!["--lib"])?;
 
     // Restore environment.
     std::env::set_current_dir(orig_cwd)?;
-    std::env::set_var("CARGO_MANIFEST_DIR", orig_manifest_dir);
 
     let new_content = fs::read_to_string(&lib_path)?;
     Ok(new_content)

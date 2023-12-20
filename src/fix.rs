@@ -7,8 +7,29 @@ use std::{
     borrow::Cow,
     collections::HashMap,
     env, fs,
-    path::{Path, PathBuf},
+    path::PathBuf,
 };
+
+fn find_crate_root() -> PathBuf {
+    // Find Cargo.toml from parent directories.
+    if let Ok(dir) = env::current_dir() {
+        let mut dir = dir;
+        loop {
+            if dir.join("Cargo.toml").is_file() {
+                return dir;
+            }
+            match dir.parent() {
+                Some(parent) => dir = parent.to_path_buf(),
+                None => break,
+            }
+        }
+    }
+    // CARGO_MANIFEST_DIR might be unset.
+    if let Some(crate_root) = env::var_os("CARGO_MANIFEST_DIR") {
+        return PathBuf::from(crate_root);
+    }
+    return PathBuf::new();
+}
 
 /// Attempt to fix failures. Return count of fixes applied.
 pub(crate) fn fix(failures: Vec<AssertEqFailure>) -> anyhow::Result<usize> {
@@ -16,8 +37,8 @@ pub(crate) fn fix(failures: Vec<AssertEqFailure>) -> anyhow::Result<usize> {
     let mut content_by_path = HashMap::<PathBuf, String>::new();
     let mut fixes_by_path = HashMap::<PathBuf, Vec<Fix>>::new();
 
-    let crate_root = env::var("CARGO_MANIFEST_DIR").unwrap_or_default();
-    let crate_root = Path::new(&crate_root);
+    let crate_root = find_crate_root();
+    dbg!(&crate_root);
 
     for failure in failures {
         let path = crate_root.join(&failure.path);
