@@ -12,6 +12,7 @@ use std::{
     env,
     ffi::OsStr,
     io::{self, Write},
+    path::Path,
     process::{self, Command},
     str,
 };
@@ -21,18 +22,27 @@ fn main() -> anyhow::Result<()> {
         .skip(1)
         .skip_while(|s| s == "fixeq")
         .collect();
-    let exitcode = main_with_args(args)?;
+    let exitcode = main_with_args(args, None, None)?;
     process::exit(exitcode);
 }
 
 pub(crate) fn main_with_args<S: AsRef<OsStr>>(
     args: impl IntoIterator<Item = S>,
+    cwd: Option<&Path>,
+    target_dir: Option<&Path>,
 ) -> anyhow::Result<i32> {
     let args: Vec<_> = args.into_iter().collect();
     let cargo = env::var("CARGO").unwrap_or_else(|_| "cargo".to_string());
     let exitcode = loop {
         eprint!("Running tests...");
-        let output = Command::new(&cargo)
+        let mut cargo_cmd = Command::new(&cargo);
+        if let Some(cwd) = cwd {
+            cargo_cmd.current_dir(cwd);
+        }
+        if let Some(target_dir) = target_dir {
+            cargo_cmd.env("CARGO_TARGET_DIR", target_dir);
+        }
+        let output = cargo_cmd
             .arg("test")
             .args(&args)
             .output()
@@ -58,7 +68,7 @@ pub(crate) fn main_with_args<S: AsRef<OsStr>>(
 
         let out = str::from_utf8(&output.stdout).unwrap_or("");
         let failures = parse_out::find_assert_eq_failures(out);
-        let count = fix::fix(failures).context("fixing failures")?;
+        let count = fix::fix(failures, cwd).context("fixing failures")?;
 
         if count == 0 {
             eprintln!(" failed.");

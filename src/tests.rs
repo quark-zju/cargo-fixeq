@@ -4,8 +4,6 @@ use std::fs;
 /// Fix `code` that matches `func`. Return the fixed code.
 /// For testing purpose only.
 fn fix_code(code: &str) -> Result<String> {
-    let orig_cwd = std::env::current_dir()?;
-
     let dir = tempfile::tempdir()?;
     fs::write(
         dir.path().join("Cargo.toml"),
@@ -20,12 +18,8 @@ path = "example.rs""#,
     let lib_path = dir.path().join("example.rs");
     fs::write(&lib_path, code)?;
 
-    std::env::set_current_dir(dir.path())?;
-
-    crate::main_with_args(vec!["--lib"])?;
-
-    // Restore environment.
-    std::env::set_current_dir(orig_cwd)?;
+    let target_dir = dir.path().join("target");
+    crate::main_with_args(vec!["--lib"], Some(dir.path()), Some(&target_dir))?;
 
     let new_content = fs::read_to_string(&lib_path)?;
     Ok(new_content)

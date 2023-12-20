@@ -3,16 +3,15 @@
 use crate::parse_code::{self, AssertEqLocation, Location};
 use crate::parse_out::AssertEqFailure;
 use anyhow::Context;
-use std::{
-    borrow::Cow,
-    collections::HashMap,
-    env, fs,
-    path::PathBuf,
-};
+use std::{borrow::Cow, collections::HashMap, env, fs, path::Path, path::PathBuf};
 
-fn find_crate_root() -> PathBuf {
+fn find_crate_root(cwd: Option<&Path>) -> PathBuf {
     // Find Cargo.toml from parent directories.
-    if let Ok(dir) = env::current_dir() {
+    let dir = match cwd {
+        Some(cwd) => Some(cwd.to_path_buf()),
+        None => env::current_dir().ok(),
+    };
+    if let Some(dir) = dir {
         let mut dir = dir;
         loop {
             if dir.join("Cargo.toml").is_file() {
@@ -32,13 +31,12 @@ fn find_crate_root() -> PathBuf {
 }
 
 /// Attempt to fix failures. Return count of fixes applied.
-pub(crate) fn fix(failures: Vec<AssertEqFailure>) -> anyhow::Result<usize> {
+pub(crate) fn fix(failures: Vec<AssertEqFailure>, cwd: Option<&Path>) -> anyhow::Result<usize> {
     let mut assert_eqs_by_path = HashMap::<PathBuf, Vec<AssertEqLocation>>::new();
     let mut content_by_path = HashMap::<PathBuf, String>::new();
     let mut fixes_by_path = HashMap::<PathBuf, Vec<Fix>>::new();
 
-    let crate_root = find_crate_root();
-    dbg!(&crate_root);
+    let crate_root = find_crate_root(cwd);
 
     for failure in failures {
         let path = crate_root.join(&failure.path);
