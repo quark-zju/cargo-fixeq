@@ -1,7 +1,7 @@
 [package]
 name = "cargo-fixeq"
-version = "0.4.0"
-edition = "2018"
+version = "0.5.0"
+edition = "2021"
 authors = ["Jun Wu <quark@lihdd.net>"]
 license = "MIT"
 description = "Fix `assert_eq!` test errors automatically."
