@@ -47,13 +47,11 @@ impl<'ast> Visit<'ast> for AssertEqVisitor {
                 //                   ^ ^      ^ ^
                 //                   | start  | seen_comma=2
                 //        seen_comma=1        end
-                if seen_comma == 1 {
-                    if start.is_none() && seen_comma == 1 {
-                        start = Some(token.span().start());
-                    }
-                    if end.is_none() {
-                        end = Some(token.span().end());
-                    }
+                if start.is_none() && seen_comma == 1 {
+                    start = Some(token.span().start());
+                }
+                if end.is_none() || seen_comma == 1 {
+                    end = Some(token.span().end());
                 }
             }
             if let (Some(start), Some(end)) = (start, end) {
@@ -125,7 +123,7 @@ fn main() {
     },
     AssertEqLocation {
         assert: 11,4-17,5,
-        rhs: 13,8-13,10,
+        rhs: 13,8-16,9,
     },
 ]"#
         );

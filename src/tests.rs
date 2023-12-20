@@ -115,3 +115,19 @@ fn test_fixeq_same_line() {
         "#[test] fn f() { assert_eq!(1, 1); assert_eq!('3', '3'); }\n",
     );
 }
+
+#[test]
+fn test_fixeq_macro_rhs() {
+    assert_eq!(
+        fix_code("#[test] fn f() { assert_eq!((0..3).collect::<Vec<u8>>(), vec![0]); }\n").unwrap(),
+        "#[test] fn f() { assert_eq!((0..3).collect::<Vec<u8>>(), [0, 1, 2]); }\n",
+    );
+}
+
+#[test]
+fn test_fixeq_macro_rhs_with_message() {
+    assert_eq!(
+        fix_code("#[test] fn f() { assert_eq!((0..3).collect::<Vec<u8>>(), vec![0], \"m\"); }\n").unwrap(),
+        "#[test] fn f() { assert_eq!((0..3).collect::<Vec<u8>>(), [0, 1, 2], \"m\"); }\n",
+    );
+}
