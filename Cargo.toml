@@ -9,6 +9,7 @@ categories = ["development-tools::cargo-plugins", "development-tools::testing"]
 keywords = ["cargo", "subcommand", "tests"]
 readme = "README.md"
 repository = "https://github.com/quark-zju/cargo-fixeq"
+rust-version = "1.73"
 
 [dependencies]
 anyhow = "1"

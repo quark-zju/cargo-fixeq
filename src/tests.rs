@@ -107,3 +107,11 @@ fn test_fixeq_with_message() {
 "#
     );
 }
+
+#[test]
+fn test_fixeq_same_line() {
+    assert_eq!(
+        fix_code("#[test] fn f() { assert_eq!(1, 2); assert_eq!('3', '4'); }\n").unwrap(),
+        "#[test] fn f() { assert_eq!(1, 1); assert_eq!('3', '3'); }\n",
+    );
+}

@@ -69,8 +69,11 @@ impl<'ast> Visit<'ast> for AssertEqVisitor {
 }
 
 impl Location {
-    pub(crate) fn overlaps_line(&self, line: usize) -> bool {
-        self.start.line <= line && self.end.line >= line
+    pub(crate) fn overlaps_line_col(&self, line: usize, col: usize) -> bool {
+        self.start.line <= line
+            && self.end.line >= line
+            && (self.start.line > line || self.start.column <= col)
+            && (self.end.line < line || self.end.column >= col)
     }
 }
 

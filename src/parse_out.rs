@@ -1,47 +1,47 @@
-//! Parse `cargo test` output.
-
-use regex::Regex;
-use std::sync::OnceLock;
+//! Parse `cargo test` output (Rust >= 1.73 format).
 
 /// Find `assert_eq!` failures from `cargo test` output.
 pub(crate) fn find_assert_eq_failures(output: &str) -> Vec<AssertEqFailure> {
-    let mut lhs: Option<String> = None;
-    output
-        .lines()
-        .filter_map(move |line| {
-            if let Some(captures) = assert_eq_failure_left_re().captures(line) {
-                lhs = captures.get(1).map(|m| m.as_str().to_string());
-            } else if let Some(captures) = assert_eq_failure_right_re().captures(line) {
-                if let Some(actual) = &lhs {
-                    let actual = actual.clone();
-                    lhs = None;
-                    let path = captures.get(1).map(|m| m.as_str().to_string());
-                    let row = captures
-                        .get(2)
-                        .and_then(|s| s.as_str().parse::<usize>().ok());
-                    if let (Some(path), Some(line)) = (path, row) {
-                        return Some(AssertEqFailure { actual, line, path });
-                    }
-                }
-            }
-            None
-        })
+    // Example:
+    // thread 'main' panicked at $DIR/main.rs:6:5:
+    // assertion `left == right` failed: my custom message value
+    //   left: 1
+    //  right: 2
+    // See https://github.com/rust-lang/rust/pull/111071
+    // https://github.com/rust-lang/rust/commit/950e3d9989c6ebbf7b43961e4268bd3e403a84bb
+    let lines: Vec<&str> = output.lines().collect();
+    (0..lines.len())
+        .filter_map(|i| maybe_extract_failure(&lines, i))
         .collect()
+}
+
+fn maybe_extract_failure(lines: &[&str], i: usize) -> Option<AssertEqFailure> {
+    let path_line_col = lines
+        .get(i)?
+        .split_once(" panicked at ")?
+        .1
+        .strip_suffix(":")?;
+    let _ = lines
+        .get(i + 1)?
+        .strip_prefix("assertion `left == right` failed")?;
+    let actual = lines.get(i + 2)?.strip_prefix("  left: ")?;
+    let _ = lines.get(i + 3)?.strip_prefix(" right: ")?;
+    let (path_line, col) = path_line_col.rsplit_once(':')?;
+    let (path, line) = path_line.rsplit_once(':')?;
+    let line: usize = line.parse().ok()?;
+    let col: usize = col.parse().ok()?;
+    Some(AssertEqFailure {
+        actual: actual.to_string(),
+        path: path.to_string(),
+        line,
+        col,
+    })
 }
 
 #[derive(Debug)]
 pub(crate) struct AssertEqFailure {
     pub(crate) actual: String,
-    pub(crate) line: usize,
     pub(crate) path: String,
-}
-
-fn assert_eq_failure_left_re() -> &'static Regex {
-    static ASSERT_EQ_FAILURE_LEFT_RE: OnceLock<Regex> = OnceLock::new();
-    ASSERT_EQ_FAILURE_LEFT_RE.get_or_init(|| Regex::new(r"^  left: `(.*)`,$").unwrap())
-}
-
-fn assert_eq_failure_right_re() -> &'static Regex {
-    static ASSERT_EQ_FAILURE_RIGHT_RE: OnceLock<Regex> = OnceLock::new();
-    ASSERT_EQ_FAILURE_RIGHT_RE.get_or_init(|| Regex::new(r"^ right: .*, (.*):(\d+):\d+$").unwrap())
+    pub(crate) line: usize,
+    pub(crate) col: usize,
 }

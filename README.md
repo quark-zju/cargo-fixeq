@@ -51,5 +51,10 @@ In general, `cargo-fixeq` can be helpful for writing initial tests and updating 
 
 All parameters are passed to `cargo test`. `cargo-fixeq` does not define its own parameters.
 
+## Versions
+
+- `cargo-fixeq 0.5` works for Rust >= 1.73, which [changed `assert_eq!` output format](https://github.com/rust-lang/rust/commit/950e3d9989c6ebbf7b43961e4268bd3e403a84bb).
+- `cargo-fixeq 0.4` works for Rust < 1.73.
+
 ## Similar Projects
 - [expect-test](https://github.com/rust-analyzer/expect-test): Lightweight snapshot testing.

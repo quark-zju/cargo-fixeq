@@ -51,7 +51,7 @@ pub(crate) fn fix(failures: Vec<AssertEqFailure>, cwd: Option<&Path>) -> anyhow:
         });
         if let Some(assert_eq) = assert_eqs
             .iter()
-            .find(|a| a.assert.overlaps_line(failure.line))
+            .find(|a| a.assert.overlaps_line_col(failure.line, failure.col))
         {
             let fix = Fix {
                 location: assert_eq.rhs.clone(),
@@ -97,6 +97,7 @@ pub(crate) fn apply_fixes(code: &str, mut fixes: Vec<Fix>) -> String {
 }
 
 /// Replace code at `location` with `content`.
+#[cfg_attr(test, derive(Debug))]
 pub(crate) struct Fix {
     pub(crate) location: Location,
     pub(crate) content: String,
