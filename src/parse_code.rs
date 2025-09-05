@@ -70,8 +70,8 @@ impl Location {
     pub(crate) fn overlaps_line_col(&self, line: usize, col: usize) -> bool {
         self.start.line <= line
             && self.end.line >= line
-            && (self.start.line > line || self.start.column <= col)
-            && (self.end.line < line || self.end.column >= col)
+            && (self.start.line < line || self.start.column <= col)
+            && (self.end.line > line || self.end.column >= col)
     }
 }
 
